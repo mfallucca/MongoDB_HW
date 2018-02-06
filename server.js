@@ -1,5 +1,6 @@
 var express = require("express");
 var bodyParser = require("body-parser");
+var exphbs = require('express-handlebars');
 var logger = require("morgan");
 var mongoose = require("mongoose");
 var axios = require("axios");
@@ -12,6 +13,10 @@ var PORT = 3000;
 
 // Initialize Express
 var app = express();
+
+// Set handlebars as view engine.
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
 
 
 // Use morgan logger for logging requests
@@ -28,6 +33,9 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
+app.get("/", function(req,res) {
+  res.render("index");
+})
 
 app.get("/scrape", function(req, res) {
     // First, we grab the body of the html with request
