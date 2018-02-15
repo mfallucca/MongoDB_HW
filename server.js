@@ -33,8 +33,13 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
+var Article = require('./models/Article.js');
+
 app.get("/", function(req,res) {
-  res.render("index");
+  Article.find({}, function(err, doc) {
+    console.log(doc)
+  res.render("index", {doc});
+  })
 })
 
 app.get("/scrape", function(req, res) {
@@ -79,3 +84,33 @@ app.listen(PORT, function() {
     console.log("App running on port " + PORT + "!");
   });
   
+
+app.get('/articles', function(req, res){
+  Article.find({}, function(err, doc){
+    if (err){
+      console.log(err);
+    } else {
+      res.json(doc);
+    }
+  });
+});
+
+app.post('/articles/:id', function(req, res){
+	var newNote = new Note(req.body);
+
+	newNote.save(function(err, doc){
+		if(err){
+			console.log(err);
+		} else {
+			Article.findOneAndUpdate({'_id': req.params.id}, {'note':doc._id})
+			.exec(function(err, doc){
+				if (err){
+					console.log(err);
+				} else {
+					res.send(doc);
+				}
+			});
+
+		}
+	});
+});
